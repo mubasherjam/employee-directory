@@ -7,6 +7,22 @@
  </div>
  <!-- Header Ends -->
 
+ <!-- Toolbar Starts -->
+ <div class="toolbar">
+  <div class="search-box">
+   <input type="text" placeholder="Search by name, email, or department..." (input)="onSearch($any($event.target).value)" />
+  </div>
+ </div>
+ <!-- Toolbar Ends -->
+
+
+ <!-- Results Count Starts -->
+ <div class="results-count">
+  Showing {{employees.length}} of {{allEmployees.length}} employees
+ </div>
+ <!-- Results Count Ends -->
+
+
  <!-- Loading State Starts -->
  @if (isLoading)
  {
