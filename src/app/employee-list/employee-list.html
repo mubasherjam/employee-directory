@@ -12,13 +12,55 @@
   <div class="search-box">
    <input type="text" placeholder="Search by name, email, or department..." (input)="onSearch($any($event.target).value)" />
   </div>
+
+  <!-- Filters Starts -->
+  <div class="filters">
+
+   <!-- Department Filter Starts -->
+   <select (change)="onDepartmentFilter($any($event.target).value)">
+    <option value="">All Departments</option>
+    @for (department of departments; track $index)
+    {
+     <option [value]="department">{{department}}</option>
+    }
+   </select>
+   <!-- Department Filter Ends -->
+
+   <!-- Status Filter Starts -->
+   <select (change)="onStatusFilter($any($event.target).value)">
+    <option value="">All Statuses</option>
+    @for (status of statuses; track $index)
+    {
+     <option [value]="status">{{status}}</option>
+    }
+   </select>
+   <!-- Status Filter Ends -->
+
+   <!-- Status Location Starts -->
+   <select (change)="onLocationFilter($any($event.target).value)">
+    <option value="">All Locations</option>
+    @for (location of locations; track $index)
+    {
+     <option [value]="location">{{location}}</option>
+    }
+   </select>
+   <!-- Status Filter Ends -->
+  </div>
+  <!-- Filters Ends -->
  </div>
  <!-- Toolbar Ends -->
 
 
  <!-- Results Count Starts -->
  <div class="results-count">
-  Showing {{employees.length}} of {{allEmployees.length}} employees
+  @if (filteredCount > 0)
+  {
+   Showing {{rangeStart}} to {{rangeEnd}} of {{filteredCount}} employees
+  }
+  @else
+  {
+   No employees found
+  }
  </div>
  <!-- Results Count Ends -->
 
@@ -41,14 +83,143 @@
     <!-- Table Head Starts -->
     <thead>
      <tr>
-      <th>Employee</th>
-      <th>Email</th>
-      <th>Department</th>
-      <th>Designation</th>
-      <th>Location</th>
-      <th>Status</th>
-      <th>Salary</th>
-      <th>Join Date</th>
+
+      <th class="sortable" (click)="onSort('firstName')">
+       Employee
+       @if (sortColumn === 'firstName')
+       {
+        <span class="sort-indicator">
+         @if (sortDirection === 'asc')
+         {
+          ↑
+         }
+         @else
+         {
+          ↓
+         }
+        </span>
+       }
+      </th>
+
+      <th class="sortable" (click)="onSort('email')">
+       Email
+       @if (sortColumn === 'email')
+       {
+        <span class="sort-indicator">
+         @if (sortDirection === 'asc')
+         {
+          ↑
+         }
+         @else
+         {
+          ↓
+         }
+        </span>
+       }
+      </th>
+
+      <th class="sortable" (click)="onSort('department')">
+       Department
+       @if (sortColumn === 'department')
+       {
+        <span class="sort-indicator">
+         @if (sortDirection === 'asc')
+         {
+          ↑
+         }
+         @else
+         {
+          ↓
+         }
+        </span>
+       }
+      </th>
+
+      <th class="sortable" (click)="onSort('designation')">
+       Designation
+       @if (sortColumn === 'designation')
+       {
+        <span class="sort-indicator">
+         @if (sortDirection === 'asc')
+         {
+          ↑
+         }
+         @else
+         {
+          ↓
+         }
+        </span>
+       }
+      </th>
+
+      <th class="sortable" (click)="onSort('location')">
+       Location
+       @if (sortColumn === 'location')
+       {
+        <span class="sort-indicator">
+         @if (sortDirection === 'asc')
+         {
+          ↑
+         }
+         @else
+         {
+          ↓
+         }
+        </span>
+       }
+      </th>
+
+      <th class="sortable" (click)="onSort('status')">
+       Status
+       @if (sortColumn === 'status')
+       {
+        <span class="sort-indicator">
+         @if (sortDirection === 'asc')
+         {
+          ↑
+         }
+         @else
+         {
+          ↓
+         }
+        </span>
+       }
+      </th>
+
+      <th class="sortable" (click)="onSort('salary')">
+       Salary
+       @if (sortColumn === 'salary')
+       {
+        <span class="sort-indicator">
+         @if (sortDirection === 'asc')
+         {
+          ↑
+         }
+         @else
+         {
+          ↓
+         }
+        </span>
+       }
+      </th>
+
+      <th class="sortable" (click)="onSort('joinDate')">
+       Join Date
+       @if (sortColumn === 'joinDate')
+       {
+        <span class="sort-indicator">
+         @if (sortDirection === 'asc')
+         {
+          ↑
+         }
+         @else
+         {
+          ↓
+         }
+        </span>
+       }
+      </th>
+
       <th>Actions</th>
      </tr>
     </thead>
@@ -111,5 +282,22 @@
    </table>
   </div>
   <!-- Table Container Ends -->
+
+
+  <!-- Pagination Controls Starts -->
+  <div class="pagination">
+   <button class="pagination-btn" (click)="onPreviousPage()" [disabled]="currentPage === 1">Previous</button>
+
+   <div class="page-numbers">
+    @for (page of pageNumbers; track page)
+    {
+     <button class="page-btn" [class.active]="page === currentPage" (click)="onPageChange(page)">{{page}}</button>
+    }
+   </div>
+
+   <button class="pagination-btn" (click)="onNextPage()" [disabled]="currentPage === totalPages">Next</button>
+  </div>
+  
+  <!-- Pagination Controls Ends -->
  }
 </div>
