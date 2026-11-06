@@ -196,8 +196,16 @@ export class EmployeeList implements OnInit
 
     if (confirmed)
     {
-      this.employeeService.deleteEmployee(employee.id);
-      this.refreshEmployees();
+      this.employeeService.deleteEmployee(employee.id).subscribe(
+        {
+          next: () => {
+            this.refreshEmployees();
+          },
+          error: (error: any) => {
+            console.error('Error deleting employee: ', error);
+          }
+        }
+      );
     }
   }
 
@@ -222,10 +230,16 @@ export class EmployeeList implements OnInit
       return;
     }
 
-    this.employeeService.updateEmployee(this.editingEmployeeId, this.editFormData);
-    this.editingEmployeeId = null;
-    this.editFormData = {};
-    this.refreshEmployees();
+    this.employeeService.updateEmployee(this.editingEmployeeId, this.editFormData).subscribe({
+      next: () => {
+        this.editingEmployeeId = null;
+        this.editFormData = {};
+        this.refreshEmployees();
+      },
+      error: (error) => {
+        console.error('Error deleting employee: ', error);
+      }
+    });
   }
 
   //Add Employee
@@ -251,9 +265,15 @@ export class EmployeeList implements OnInit
       return;
     }
 
-    this.employeeService.addEmployee(this.newEmployeeData);
-    this.showAddForm = false;
-    this.newEmployeeData = {};
-    this.refreshEmployees();
+    this.employeeService.addEmployee(this.newEmployeeData).subscribe({
+      next: () => {
+        this.showAddForm = false;
+        this.newEmployeeData = {};
+        this.refreshEmployees();
+      },
+      error: (error) => {
+        console.error('Error adding employee: ', error);
+      }
+    });
   }
 }

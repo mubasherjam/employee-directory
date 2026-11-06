@@ -237,7 +237,7 @@ export class EmployeeService
     }
   }
   
-  deleteEmployee(id: number): void
+  deleteEmployee(id: number): Observable<unknown>
   {
     this.allEmployees = this.allEmployees.filter(emp => emp.id != id);
 
@@ -251,21 +251,25 @@ export class EmployeeService
     {
       this.currentPage = 1;
     }
+
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 
-  updateEmployee(id: number, updatedData: Partial<Employee>): void
+  updateEmployee(id: number, updatedData: Partial<Employee>): Observable<Employee>
   {
     const index = this.allEmployees.findIndex(emp => emp.id === id);
 
     if (index === -1)
     {
-      return;
+      return new Observable<Employee>;
     }
 
     this.allEmployees[index] = {...this.allEmployees[index], ...updatedData};
+
+    return this.http.put<Employee>(`${this.apiUrl}/${id}`, updatedData);
   }
 
-  addEmployee(data: Partial<Employee>): void
+  addEmployee(data: Partial<Employee>): Observable<Employee>
   {
     const newId = this.allEmployees.reduce(
       (max, emp) => emp.id > max? emp.id : max, 0) + 1;
@@ -287,5 +291,7 @@ export class EmployeeService
     };
 
     this.allEmployees.push(newEmployee);
+
+    return this.http.post<Employee>(this.apiUrl, newEmployee);
   }
 }
