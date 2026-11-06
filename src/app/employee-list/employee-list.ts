@@ -276,4 +276,64 @@ export class EmployeeList implements OnInit
       }
     });
   }
+
+  //Export to CSV
+  onExportToCsv(): void
+  {
+    const employees = this.employeeService.getEmployeesForExport();
+
+    if (employees.length === 0)
+    {
+      alert('No employees to export');
+      return;
+    }
+
+    //CSV
+    //e.g: value1,value2,value3
+
+    //Define headers
+    const headers = ['ID', 'First Name', 'Last Name', 'Email', 'Phone', 'Department', 'Designation', 'Location', 'Salary', 'Join Date', 'Status'];
+
+    //Helper function to escape CSV values
+    const escapeCsvValue = (value: any): string => {
+      const stringValue = String(value ?? '');
+      //Wrap in quotes and escape existing quotes
+      return `"${stringValue.replace(/"/g, '""')}"`;
+    };
+
+    //Convert employees to CSV rows
+    const rows = employees.map(emp => {
+      return [
+        escapeCsvValue(emp.id),
+        escapeCsvValue(emp.firstName),
+        escapeCsvValue(emp.lastName),
+        escapeCsvValue(emp.email),
+        escapeCsvValue(emp.phone),
+        escapeCsvValue(emp.department),
+        escapeCsvValue(emp.designation),
+        escapeCsvValue(emp.location),
+        escapeCsvValue(emp.salary),
+        escapeCsvValue(emp.joinDate),
+        escapeCsvValue(emp.status)
+      ].join(', ')
+    });
+
+    //Unexpected CSV: value1,"va,lu,e2",value3
+
+    //Combine headers and rows
+    const csvContent = headers.join(', ') + '\n' + rows.join('\n');
+
+    //Create blob and trigger download
+    const blob = new Blob([csvContent], {
+      type: 'text/csv'
+    });
+    const url = URL.createObjectURL(blob);
+
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'employees.csv';
+    anchor.click();
+
+    URL.revokeObjectURL(url);
+  }
 }

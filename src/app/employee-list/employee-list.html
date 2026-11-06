@@ -6,7 +6,10 @@
    <h1>Employee Directory</h1>
    <p>Manage and view all employees in your organization</p>
   </div>
-  <button class="btn-add" (click)="onToggleAddForm()">Add Employee</button>
+  <div class="header-actions">
+   <button class="btn-export" (click)="onExportToCsv()">Export to CSV</button>
+   <button class="btn-add" (click)="onToggleAddForm()">Add Employee</button>
+  </div>
  </div>
  <!-- Header Ends -->
 

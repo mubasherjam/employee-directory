@@ -294,4 +294,50 @@ export class EmployeeService
 
     return this.http.post<Employee>(this.apiUrl, newEmployee);
   }
+
+  //Export to CSV
+  getEmployeesForExport(): Employee[]
+  {
+    let result = [...this.allEmployees];
+
+    //Apply search filter
+    if (this.searchTerm.trim())
+    {
+      const term = this.searchTerm.toLowerCase().trim();
+
+      result = result.filter((employee: Employee) => {
+      return (
+        employee.firstName.toLowerCase().includes(term) ||
+        employee.lastName.toLowerCase().includes(term) ||
+        employee.email.toLowerCase().includes(term) ||
+        employee.department.toLowerCase().includes(term) ||
+        employee.location.toLowerCase().includes(term)
+      );
+      });
+    }
+
+    //Apply department filter
+    if (this.filterDepartment)
+    {
+      result = result.filter(emp => emp.department === this.filterDepartment);
+    }
+
+    //Apply status filter
+    if (this.filterStatus)
+    {
+      result = result.filter(emp => emp.status === this.filterStatus);
+    }
+
+    //Apply location filter
+    if (this.filterLocation)
+    {
+      result = result.filter(emp => emp.location === this.filterLocation);
+    }
+
+    //Apply sort
+    result = this.applySort(result);
+
+    //No pagination - return all filtered results
+    return result;
+  }
 }
