@@ -236,4 +236,56 @@ export class EmployeeService
       this.currentPage--;
     }
   }
+  
+  deleteEmployee(id: number): void
+  {
+    this.allEmployees = this.allEmployees.filter(emp => emp.id != id);
+
+    //Handle edge case: current page might now be empty
+    const newTotalPages = Math.ceil(this.allEmployees.length / this.pageSize);
+    if (this.currentPage > newTotalPages)
+    {
+      this.currentPage = newTotalPages;
+    }
+    else if (newTotalPages == 0)
+    {
+      this.currentPage = 1;
+    }
+  }
+
+  updateEmployee(id: number, updatedData: Partial<Employee>): void
+  {
+    const index = this.allEmployees.findIndex(emp => emp.id === id);
+
+    if (index === -1)
+    {
+      return;
+    }
+
+    this.allEmployees[index] = {...this.allEmployees[index], ...updatedData};
+  }
+
+  addEmployee(data: Partial<Employee>): void
+  {
+    const newId = this.allEmployees.reduce(
+      (max, emp) => emp.id > max? emp.id : max, 0) + 1;
+
+    const newEmployee: Employee = {
+      id: newId,
+      firstName: data.firstName || '',
+      lastName: data.lastName || '',
+      email: data.email || '',
+      phone: data.phone || '',
+      department: data.department || 'Engineering',
+      designation: data.designation || '',
+      location: data.location || 'New York',
+      salary: data.salary || 0,
+      joinDate: new Date().toISOString().split('T')[0],
+      status: data.status || 'Active',
+      managerId: null,
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + newId
+    };
+
+    this.allEmployees.push(newEmployee);
+  }
 }

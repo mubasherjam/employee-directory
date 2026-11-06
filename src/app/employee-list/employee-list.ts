@@ -1,14 +1,15 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { DecimalPipe, DatePipe } from '@angular/common';
+import { Component, inject, OnInit } from '@angular/core';
+import { DecimalPipe, DatePipe, CurrencyPipe } from '@angular/common';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { FormsModule } from '@angular/forms';
 
 import { EmployeeService } from '../services/employee-service';
 import { Employee } from '../models/employee.model';
 
 @Component({
   selector: 'app-employee-list',
-  imports: [DecimalPipe, DatePipe],
+  imports: [DecimalPipe, DatePipe, CurrencyPipe, FormsModule],
   templateUrl: './employee-list.html',
   styleUrl: './employee-list.css',
 })
@@ -17,14 +18,25 @@ export class EmployeeList implements OnInit
   private employeeService: EmployeeService = inject(EmployeeService);
   private searchSubject: Subject<string> = new Subject<string>();
 
-  // AFTER
-employees = signal<Employee[]>([]);
-totalCount = signal<number>(0);
-isLoading = signal<boolean>(true);
+  employees: Employee[] = [];
+  totalCount: number = 0;
+  isLoading: boolean = true;
 
-departments = signal<string[]>([]);
-statuses = signal<string[]>([]);
-locations = signal<string[]>([]);
+  //Dropdown options
+  departments: string[] = [];
+  statuses: string[] = [];
+  locations: string[] = [];
+
+  //View or Delete
+  selectedEmployee: Employee | null = null;
+
+  //Editing
+  editingEmployeeId: number | null = null;
+  editFormData: Partial<Employee> = {};
+
+  //Add Employee
+  showAddForm: boolean = false;
+  newEmployeeData: Partial<Employee> = {};
 
   ngOnInit(): void 
   {
@@ -38,30 +50,32 @@ locations = signal<string[]>([]);
       this.refreshEmployees();
     });
 
-   this.isLoading.set(true);
-this.employeeService.getEmployees().subscribe({
-  next: (data: Employee[]) => {
-    this.employeeService.setEmployees(data);
+    this.isLoading = true;
+    this.employeeService.getEmployees().subscribe({
+      next: (data: Employee[]) => {
+        this.employeeService.setEmployees(data);
 
-    //Populate dropdown options
-    this.departments.set(this.employeeService.getDepartments());
-    this.statuses.set(this.employeeService.getStatuses());
-    this.locations.set(this.employeeService.getLocations());
+        //Populate dropdown options
+        this.departments = this.employeeService.getDepartments();
+        this.statuses = this.employeeService.getStatuses();
+        this.locations = this.employeeService.getLocations();
 
-    this.refreshEmployees();
-    this.totalCount.set(data.length);
-    this.isLoading.set(false);
-  },
-  error: (error) => {
-    console.error(`Error fetching employees: `, error);
-    this.isLoading.set(false);
+        this.refreshEmployees();
+        this.totalCount = data.length;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error(`Error fetching employees: `, error);
+        this.isLoading = false;
+      }
+    });
   }
-});
+
+  private refreshEmployees(): void
+  {
+    this.employees = this.employeeService.getFilteredAndSortedEmployees();
   }
-private refreshEmployees(): void
-{
-  this.employees.set(this.employeeService.getFilteredAndSortedEmployees());
-}
+
   //Pagination getters
   get currentPage(): number
   {
@@ -163,5 +177,83 @@ private refreshEmployees(): void
   get pageNumbers(): number[]
   {
     return [...Array(this.totalPages).keys()].map(i => i + 1);
+  }
+
+  /* View or Delete */
+  onViewEmployee(employee: Employee): void
+  {
+    this.selectedEmployee = employee;
+  }
+
+  onCloseDetail(): void
+  {
+    this.selectedEmployee = null;
+  }
+
+  onDeleteEmployee(employee: Employee): void
+  {
+    const confirmed: boolean = confirm(`Are you sure you want to delete ${employee.firstName} ${employee.lastName}?`);
+
+    if (confirmed)
+    {
+      this.employeeService.deleteEmployee(employee.id);
+      this.refreshEmployees();
+    }
+  }
+
+
+  //Edit Employee
+  onEditEmployee(employee: Employee): void
+  {
+    this.editingEmployeeId = employee.id;
+    this.editFormData = { ...employee };
+  }
+
+  onCancelEdit(): void
+  {
+    this.editingEmployeeId = null;
+    this.editFormData = {};
+  }
+
+  onSaveEmployee(): void
+  {
+    if (this.editingEmployeeId == null)
+    {
+      return;
+    }
+
+    this.employeeService.updateEmployee(this.editingEmployeeId, this.editFormData);
+    this.editingEmployeeId = null;
+    this.editFormData = {};
+    this.refreshEmployees();
+  }
+
+  //Add Employee
+  onToggleAddForm(): void
+  {
+    if (!this.showAddForm)
+    {
+      this.newEmployeeData = {};
+    }
+    this.showAddForm = !this.showAddForm;
+  }
+
+  onCancelAdd(): void
+  {
+    this.showAddForm = false;
+    this.newEmployeeData = {};
+  }
+
+  onAddEmployee(): void
+  {
+    if (!this.newEmployeeData.firstName || !this.newEmployeeData.lastName || !this.newEmployeeData.email)
+    {
+      return;
+    }
+
+    this.employeeService.addEmployee(this.newEmployeeData);
+    this.showAddForm = false;
+    this.newEmployeeData = {};
+    this.refreshEmployees();
   }
 }
