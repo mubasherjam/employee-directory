@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -17,15 +17,14 @@ export class EmployeeList implements OnInit
   private employeeService: EmployeeService = inject(EmployeeService);
   private searchSubject: Subject<string> = new Subject<string>();
 
-  employees: Employee[] = [];
-  totalCount: number = 0;
-  isLoading: boolean = true;
+  // AFTER
+employees = signal<Employee[]>([]);
+totalCount = signal<number>(0);
+isLoading = signal<boolean>(true);
 
-  //Dropdown options
-  departments: string[] = [];
-  statuses: string[] = [];
-  locations: string[] = [];
-
+departments = signal<string[]>([]);
+statuses = signal<string[]>([]);
+locations = signal<string[]>([]);
 
   ngOnInit(): void 
   {
@@ -39,32 +38,30 @@ export class EmployeeList implements OnInit
       this.refreshEmployees();
     });
 
-    this.isLoading = true;
-    this.employeeService.getEmployees().subscribe({
-      next: (data: Employee[]) => {
-        this.employeeService.setEmployees(data);
+   this.isLoading.set(true);
+this.employeeService.getEmployees().subscribe({
+  next: (data: Employee[]) => {
+    this.employeeService.setEmployees(data);
 
-        //Populate dropdown options
-        this.departments = this.employeeService.getDepartments();
-        this.statuses = this.employeeService.getStatuses();
-        this.locations = this.employeeService.getLocations();
+    //Populate dropdown options
+    this.departments.set(this.employeeService.getDepartments());
+    this.statuses.set(this.employeeService.getStatuses());
+    this.locations.set(this.employeeService.getLocations());
 
-        this.refreshEmployees();
-        this.totalCount = data.length;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error(`Error fetching employees: `, error);
-        this.isLoading = false;
-      }
-    });
+    this.refreshEmployees();
+    this.totalCount.set(data.length);
+    this.isLoading.set(false);
+  },
+  error: (error) => {
+    console.error(`Error fetching employees: `, error);
+    this.isLoading.set(false);
   }
-
-  private refreshEmployees(): void
-  {
-    this.employees = this.employeeService.getFilteredAndSortedEmployees();
+});
   }
-
+private refreshEmployees(): void
+{
+  this.employees.set(this.employeeService.getFilteredAndSortedEmployees());
+}
   //Pagination getters
   get currentPage(): number
   {

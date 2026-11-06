@@ -19,7 +19,7 @@
    <!-- Department Filter Starts -->
    <select (change)="onDepartmentFilter($any($event.target).value)">
     <option value="">All Departments</option>
-    @for (department of departments; track $index)
+    @for (department of departments(); track $index)
     {
      <option [value]="department">{{department}}</option>
     }
@@ -29,7 +29,7 @@
    <!-- Status Filter Starts -->
    <select (change)="onStatusFilter($any($event.target).value)">
     <option value="">All Statuses</option>
-    @for (status of statuses; track $index)
+   @for (status of statuses(); track $index)
     {
      <option [value]="status">{{status}}</option>
     }
@@ -39,7 +39,7 @@
    <!-- Status Location Starts -->
    <select (change)="onLocationFilter($any($event.target).value)">
     <option value="">All Locations</option>
-    @for (location of locations; track $index)
+   @for (location of locations(); track $index)
     {
      <option [value]="location">{{location}}</option>
     }
@@ -66,7 +66,7 @@
 
 
  <!-- Loading State Starts -->
- @if (isLoading)
+ @if (isLoading())
  {
   <div class="loading-container">
    <div class="loading-spinner"></div>
@@ -227,7 +227,7 @@
 
     <!-- Table Body Starts -->
     <tbody>
-     @for(employee of employees; track employee.id)
+     @for(employee of employees(); track employee.id)
      {
       <tr>
 
